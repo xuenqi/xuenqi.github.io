@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know about Qiuqiu</title>
+    <style>
+        :root {
+            --main-yellow: #FFE898;
+            --accent-pink: #FFD1DC;
+            --accent-blue: #B0E2FF;
+            --text-color: #6D5D39; 
+            --card-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text-color);
+            background-color: #FFFCF2;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(255, 209, 220, 0.9) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(176, 226, 255, 0.9) 0%, transparent 45%),
+                radial-gradient(circle at 100% 0%, rgba(255, 232, 152, 0.5) 0%, transparent 40%);
+            background-attachment: fixed; 
+            position: relative; 
+        }
+
+        /* 散落的白色几何图案 */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -1; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Ccircle cx='40' cy='80' r='8' fill='rgba(255,255,255,0.8)'/%3E%3Ccircle cx='280' cy='60' r='18' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='3'/%3E%3Cpolygon points='150,230 156,248 175,248 160,260 165,278 150,268 135,278 140,260 125,248 144,248' fill='rgba(255,255,255,0.7)'/%3E%3Cpolygon points='340,300 343,309 353,309 345,315 348,324 340,319 332,324 335,315 327,309 337,309' fill='none' stroke='rgba(255,255,255,0.8)' stroke-width='2'/%3E%3Cpolygon points='80,340 83,349 93,349 85,355 88,364 80,359 72,364 75,355 67,349 77,349' fill='rgba(255,255,255,0.9)'/%3E%3Ccircle cx='200' cy='120' r='10' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'/%3E%3Ccircle cx='350' cy='180' r='4' fill='rgba(255,255,255,1)'/%3E%3Cpolygon points='250,330 254,345 270,345 257,355 262,370 250,360 238,370 243,355 230,345 246,345' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='3'/%3E%3C/svg%3E");
+            background-size: 400px 400px; background-repeat: repeat; 
+        }
+
+        /* 语言切换相关逻辑 */
+        .en { display: none; } 
+        body.en-mode .zh { display: none; } 
+        body.en-mode .en { display: inline; } 
+
+        .lang-switch {
+            position: fixed; top: 20px; right: 30px; z-index: 101;
+            background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9); padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; color: var(--text-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); transition: 0.3s; font-size: 0.9em;
+        }
+        .lang-switch:hover { transform: scale(1.05); background: rgba(255, 255, 255, 0.8); }
+
+        /* 毛玻璃材质 */
+        section, .timeline-content, .account-preview, .xhs-item, .card-inner, nav, .story-panel {
+            background: rgba(255, 255, 255, 0.45) !important;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+            border: 1px solid rgba(255, 255, 255, 0.9) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04) !important; 
+        }
+
+        nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100;
+            padding: 10px 30px; border-radius: 50px; display: flex; gap: 20px;
+        }
+        nav a { text-decoration: none; color: var(--text-color); font-weight: bold; font-size: 0.9em; transition: 0.3s; }
+        nav a:hover { color: #FFB700; transform: scale(1.1); }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 100px 20px; }
+        
+        /* 顶部 Header：增加悬浮气泡 */
+        header { text-align: center; padding: 100px 0; position: relative; }
+        .header-decoration { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+        .float-bubble {
+            position: absolute; padding: 10px 22px; border-radius: 30px;
+            background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.9); font-size: 0.9em; font-weight: bold; color: var(--text-color);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03); animation: floatMove 4s ease-in-out infinite;
+        }
+        .float-bubble:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .float-bubble:nth-child(2) { top: 60%; left: 10%; animation-delay: 1s; }
+        .float-bubble:nth-child(3) { top: 12%; right: 18%; animation-delay: 0.5s; }
+        .float-bubble:nth-child(4) { top: 70%; right: 12%; animation-delay: 1.5s; }
+        @keyframes floatMove {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .hero-title { font-size: 4em; margin: 0; background: linear-gradient(45deg, #FFB700, #FF8DA1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .hero-subtitle { font-size: 1.5em; margin-top: 10px; opacity: 0.8; font-weight: bold; }
+        .typewriter-text { color: #FF4D6D; }
+        .typewriter-text::after { content: '|'; animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        section { margin-bottom: 80px; padding: 40px; border-radius: 40px; }
+        h2.section-title { text-align: center; font-size: 2em; margin-bottom: 20px; position: relative; }
+
+        /* --- 实习经历（增加局部滚动） --- */
+        .intern-scroll-wrapper {
+            max-height: 600px; overflow-y: auto; padding-right: 15px; position: relative;
+            scrollbar-width: thin; scrollbar-color: var(--accent-pink) transparent;
+        }
+        .intern-scroll-wrapper::-webkit-scrollbar { width: 6px; }
+        .intern-scroll-wrapper::-webkit-scrollbar-thumb { background: var(--accent-pink); border-radius: 10px; }
+        
+        .scroll-guide-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
+            background: linear-gradient(to bottom, rgba(255,252,242,0), rgba(255,252,242,0.9));
+            display: flex; justify-content: center; align-items: flex-end; padding-bottom: 10px;
+            pointer-events: none; z-index: 10; border-radius: 0 0 40px 40px; transition: opacity 0.3s;
+        }
+        .scroll-indicator-text {
+            font-size: 0.85em; font-weight: bold; color: #FFB700;
+            animation: bounce 2s infinite; background: rgba(255,255,255,0.8); padding: 5px 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        .timeline-container { position: relative; max-width: 950px; margin: 0 auto; padding: 20px 0; }
+        .timeline-line { position: absolute; left: 50%; transform: translateX(-50%); width: 2px; background: rgba(255,255,255,0.6); top: 0; bottom: 0; z-index: 1; }
+        .timeline-row { display: flex; align-items: center; position: relative; margin-bottom: 30px; }
+        .timeline-col { width: 50%; display: flex; align-items: center; }
+        .timeline-col.left { justify-content: flex-end; padding-right: 45px; }
+        .timeline-col.right { justify-content: flex-start; padding-left: 45px; }
+        .timeline-dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--accent-pink); border: 3px solid white; border-radius: 50%; z-index: 2; box-shadow: 0 0 10px rgba(255, 209, 220, 0.5); }
+        .timeline-img-placeholder { width: 100%; max-width: 240px; aspect-ratio: 4 / 3; border-radius: 20px; object-fit: cover; display: block; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: 0.3s; }
+        .timeline-content { width: 100%; max-width: 320px; border-radius: 25px; padding: 18px; text-align: left; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .timeline-content:hover { transform: scale(1.05) translateY(-5px); background: rgba(255, 255, 255, 0.8) !important; box-shadow: 0 15px 30px rgba(255, 183, 0, 0.15) !important; z-index: 10;}
+        .timeline-date { font-size: 0.8em; color: #FFB700; font-weight: bold; margin-bottom: 4px; display: block; }
+        .timeline-content h3 { margin: 0; font-size: 1.05em; color: var(--text-color); }
+        .subtitle { font-size: 0.85em; color: #888; margin: 3px 0; }
+        .timeline-details { margin: 8px 0 0 0; padding-left: 15px; font-size: 0.85em; line-height: 1.6; color: var(--text-color); }
+        .timeline-details li { margin-bottom: 5px; }
+
+        @media (max-width: 768px) {
+            .timeline-line { left: 20px; } .timeline-dot { left: 20px; }
+            .timeline-row { flex-direction: column; padding-left: 45px; align-items: flex-start; margin-bottom: 40px; }
+            .timeline-col { width: 100%; padding: 0 !important; justify-content: flex-start !important; }
+            .timeline-img-placeholder { margin-bottom: 15px; max-width: 100%; }
+            .timeline-content { max-width: 100%; }
+        }
+
+        /* --- 项目经历 --- */
+        .project-showcase { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: center; background: rgba(255, 255, 255, 0.45) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9) !important; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04) !important; padding: 30px; border-radius: 30px; }
+        .browser-mockup { background: rgba(255, 255, 255, 0.8); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.9); overflow: hidden; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); transition: transform 0.3s ease; }
+        .browser-mockup:hover { transform: translateY(-5px); }
+        .browser-header { height: 32px; background: rgba(240, 240, 240, 0.8); display: flex; align-items: center; padding: 0 15px; gap: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; } .dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
+        .browser-url { margin-left: 15px; background: rgba(255, 255, 255, 0.6); padding: 2px 10px; border-radius: 10px; font-size: 0.7em; color: #888; flex-grow: 1; text-align: center; font-family: monospace; }
+        .project-preview-img { width: 100%; display: block; object-fit: cover; aspect-ratio: 16 / 10; }
+        .project-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .project-app-icon { width: 55px; height: 55px; border-radius: 16px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); border: 2px solid white; }
+        .project-title { margin: 0; font-size: 1.4em; color: var(--text-color); }
+        .project-role { margin: 5px 0 0 0; font-size: 0.9em; color: #ff4d6d; font-weight: bold; }
+        .project-desc { font-size: 0.95em; line-height: 1.6; margin-bottom: 20px; color: var(--text-color); }
+        .project-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; }
+        .p-tag { background: linear-gradient(135deg, rgba(255, 232, 152, 0.6), rgba(255, 209, 220, 0.6)); border: 1px solid rgba(255, 255, 255, 0.8); padding: 6px 14px; border-radius: 20px; font-size: 0.8em; font-weight: bold; color: var(--text-color); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .project-link-btn { display: inline-block; padding: 12px 28px; background: var(--text-color); color: var(--main-yellow); text-decoration: none; border-radius: 30px; font-weight: bold; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(109, 93, 57, 0.2); }
+        .project-link-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 25px rgba(109, 93, 57, 0.3); background: #4a3f27; }
+        @media (max-width: 800px) { .project-showcase { grid-template-columns: 1fr; padding: 20px; } .project-header { flex-direction: column; align-items: flex-start; } }
+
+        /* --- 自媒体 -> 内容实验（解决对称排版问题） --- */
+        .social-container { 
+            display: grid; 
+            /* 设置左右等分，整体居中，并限制最大宽度 */
+            grid-template-columns: 400px 320px; 
+            justify-content: center; 
+            gap: 80px; 
+            align-items: flex-start;
+            margin: 0 auto;
+        }
+        .social-left { position: sticky; top: 100px; }
+        .account-preview { padding: 25px; border-radius: 30px; }
+        /* 恢复滑动引导按钮与呼吸动画 */
+        .click-guide-btn { 
+            margin-top: 25px; 
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent-pink), #ffb6c1); 
+            color: var(--text-color); 
+            border-radius: 20px; 
+            font-size: 0.85em; 
+            font-weight: bold; 
+            box-shadow: 0 4px 15px rgba(255, 209, 220, 0.6);
+            animation: pulseBtn 2s infinite ease-in-out; 
+            display: block; /* 占满整行居中更好看 */
+            text-align: center;
+            border: 2px solid white;
+            cursor: default;
+        }
+        @keyframes pulseBtn { 
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 209, 220, 0.6); } 
+            50% { transform: scale(1.03); box-shadow: 0 8px 25px rgba(255, 209, 220, 0.9); } 
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(255, 209, 220, 0.6); } 
+        }
+
+        /* 优化手机屏幕滚动体验，防止底部内容被截断 */
+        .phone-screen { 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(241,241,241,0.9); 
+            border-radius: 30px; 
+            overflow-y: auto; 
+            padding-top: 40px; 
+            padding-bottom: 30px; /* 增加底部防遮挡边距 */
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
+        }
+        /* 封面调整为 4:3 横版 */
+        .account-img-placeholder { width: 100%; aspect-ratio: 4/3; border-radius: 20px; margin-bottom: 20px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        /* 新增 PM Insight 样式 */
+        .insight-tag {
+            background: rgba(255, 255, 255, 0.8); border-left: 4px solid var(--accent-pink);
+            padding: 10px 12px; margin-bottom: 12px; border-radius: 4px 12px 12px 4px;
+            font-size: 0.85em; font-weight: bold; color: var(--text-color);
+            box-shadow: 2px 4px 12px rgba(0,0,0,0.04); transition: 0.3s;
+        }
+        .insight-tag:hover { transform: translateX(5px); background: #fff; border-left-color: #FFB700; }
+
+        .social-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; margin-top: 15px; }
+        .s-tag { font-size: 0.8em; color: #ff4d6d; background: rgba(255,240,243,0.8); padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+        
+        .social-right-phone { display: flex; justify-content: center; }
+        .phone-mockup { width: 320px; height: 640px; background: #1e1e1e; border-radius: 40px; padding: 10px; border: 5px solid #333; position: relative; overflow: hidden; }
+        .phone-notch { width: 90px; height: 20px; background: black; border-radius: 10px; position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .phone-screen { width: 100%; height: 100%; background: rgba(241,241,241,0.9); border-radius: 30px; overflow-y: scroll; padding-top: 40px; -ms-overflow-style: none; scrollbar-width: none; }
+        .phone-screen::-webkit-scrollbar { display: none; }
+        .xhs-feed-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background-color: rgba(200,200,200,0.5); }
+        .xhs-item { text-decoration: none; color: inherit; display: block; background: white; transition: opacity 0.2s; }
+        .xhs-item:hover { opacity: 0.9; }
+        .xhs-img-placeholder { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+        .xhs-text-cont { padding: 8px 6px; }
+        .xhs-title { font-size: 0.85em; font-weight: bold; margin: 0 0 5px 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .xhs-footer { font-size: 0.75em; color: #888; }
+        
+        @media (max-width: 900px) { 
+            .social-container { grid-template-columns: 1fr; gap: 40px; } 
+            .social-left { position: relative; top: 0; max-width: 100%; }
+        }
+
+        /* --- 多元探索（3D 翻牌与面板） --- */
+        .talent-header { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .floating-keyword {
+            display: inline-block; padding: 8px 22px; border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 209, 220, 0.8), rgba(176, 226, 255, 0.8));
+            color: var(--text-color); font-size: 0.95em; font-weight: 700; letter-spacing: 0.05em;
+            box-shadow: 0 8px 20px rgba(255, 183, 0, 0.12); animation: floatTag 3s ease-in-out infinite;
+        }
+        @keyframes floatTag { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        
+        .tarot-stage { position: relative; height: 450px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 30px; margin-top: -20px; }
+        .tarot-container { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; perspective: 1200px; transition: 0.6s; z-index: 2; }
+        
+        .tarot-card {
+            position: absolute; width: 195px; height: 260px; cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d;
+            transform-origin: bottom center;
+            transform: translateX(calc((var(--i) - 4) * 45px)) rotate(calc((var(--i) - 4) * 8deg)) translateY(calc(abs(var(--i) - 4) * 8px)); z-index: var(--i);
+        }
+        .tarot-card:hover:not(.flipped) { transform: translateX(calc((var(--i) - 4) * 45px)) rotate(calc((var(--i) - 4) * 8deg)) translateY(-20px) scale(1.05); }
+
+        .card-inner { 
+            width: 100%; height: 100%; position: relative; 
+            transform-style: preserve-3d; 
+            -webkit-transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+
+        .card-front, .card-back { 
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0;
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            border-radius: 18px; 
+            border: 4px solid rgba(255,255,255,0.9); 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+
+        .card-back { 
+            background: linear-gradient(135deg, var(--main-yellow), var(--accent-pink)); 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 3em; color: white; 
+            transform: rotateY(0deg); 
+            -webkit-transform: rotateY(0deg);
+        }
+        .card-back::after { content: "✨"; position: absolute; opacity: 0.5; font-size: 2em; }
+
+        .card-front { background: white; transform: rotateY(180deg); -webkit-transform: rotateY(180deg);}
+
+        .card-image { 
+            width: 100%; height: 100%; object-fit: cover; display: block; 
+            border-radius: 13px; /* 适配外边框圆角 */
+            /*强制让图片在 3D 空间中向前凸出 1 像素，确保它永远压在白色面板上方 */
+            transform: translateZ(1px);
+            -webkit-transform: translateZ(1px);
+        }
+
+        .tarot-card.flipped .card-back {visibility: hidden;transition: visibility 0s 0.15s; }
+        .tarot-card:not(.flipped) .card-front {visibility: hidden;transition: visibility 0s 0.15s;}
+        .tarot-stage.has-active .tarot-container { transform: translateX(-200px); }
+        .tarot-card.flipped .card-inner { transform: rotateY(180deg); }
+        .tarot-card.flipped { transform: translateX(0) rotate(0deg) scale(1.3) translateY(0px) !important; z-index: 100 !important; }
+        .tarot-stage.has-active .tarot-card:not(.flipped) { opacity: 0; pointer-events: none; transform: translateY(100px); }
+        .story-panel {
+            position: absolute; 
+            right: 20px; 
+            top: 60px; 
+            transform: translateX(50px); 
+            width: 45%; max-width: 400px; padding: 30px; border-radius: 25px;
+            opacity: 0; pointer-events: none; 
+            transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10;
+        }
+        .tarot-stage.has-active .story-panel { opacity: 1; pointer-events: auto; transform: translateX(0); }
+        .story-title { font-size: 1.4em; margin: 0 0 10px 0; color: var(--text-color); }
+        .story-tag { display: inline-block; padding: 4px 12px; background: var(--main-yellow); color: #fff; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-bottom: 15px; }
+        .story-desc { font-size: 0.95em; line-height: 1.6; margin-bottom: 20px; color: #555; }
+        .close-btn { background: var(--text-color); color: var(--main-yellow); border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .close-btn:hover { background: #4a3f27; transform: scale(1.05); }
+
+        @media (max-width: 800px) {
+            .tarot-stage.has-active .tarot-container { transform: translateY(-120px); }
+            .story-panel { width: 90%; right: 5%; top: auto; bottom: 20px; transform: translateY(50px); padding: 20px; }
+            .tarot-stage.has-active .story-panel { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-switch" id="langToggle">English</div>
+
+    <nav>
+        <a href="#intern"><span class="zh">个人经历</span><span class="en">Experiences</span></a>
+        <a href="#project"><span class="zh">AI项目</span><span class="en">AI Projects</span></a>
+        <a href="#social"><span class="zh">内容实验</span><span class="en">Content Lab</span></a>
+        <a href="#talents"><span class="zh">能力画布</span><span class="en">Capability</span></a>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div class="header-decoration">
+                <span class="float-bubble">🤖 AI Product</span>
+                <span class="float-bubble">📊 Data Insight</span>
+                <span class="float-bubble">🌍 Polymath</span>
+                <span class="float-bubble">✨ Vibe Coding</span>
+            </div>
+            <h1 class="hero-title">Know about Qiuqiu</h1>
+            <p class="hero-subtitle">
+                <span class="zh">球球</span><span class="en">Qiuqiu</span> |
+                <span class="typewriter-text" id="typewriter"></span>
+            </p>
+        </header>
+
+        <section id="intern">
+            <h2 class="section-title">
+                <span class="zh">The Practitioner 实践者</span><span class="en">The Practitioner</span>
+            </h2>
+            
+            <div style="position: relative;">
+                <div class="intern-scroll-wrapper" id="intern-scroll">
+                    <div class="timeline-container">
+                        <div class="timeline-line"></div>
+                
+                        <div class="timeline-row">
+                            <div class="timeline-col left">
+                                <img class="timeline-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/zuel.jpg" alt="ZUEL">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-col right">
+                                <div class="timeline-content">
+                                    <span class="timeline-date">2021.09 - 2025.07</span>
+                                    <h3>
+                                        <span class="zh">中南财经政法大学</span><span class="en">Zhongnan Univ. of Economics and Law</span>
+                                    </h3>
+                                    <p class="subtitle">
+                                        <span class="zh">大数据 + 金融工程 双学位</span><span class="en">Big Data + Financial Engineering Dual Degree</span>
+                                    </p>
+                                    <ul class="timeline-details">
+                                        <li>
+                                            <span class="zh">🏆 综合排名第一 | 优秀毕业生</span><span class="en">🏆 Ranked 1st | Outstanding Graduate</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">🚩 优秀学生干部 | 挑战杯国家三等奖</span><span class="en">🚩 Excellent Student Leader | Challenge Cup National 3rd Prize</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="timeline-row">
+                            <div class="timeline-col left">
+                                <div class="timeline-content">
+                                    <span class="timeline-date">2024.10 - 2025.02</span>
+                                    <h3>
+                                        <span class="zh">雪球 · 数据产品实习</span><span class="en">Xueqiu · Data PM Intern</span>
+                                    </h3>
+                                    <ul class="timeline-details">
+                                        <li>
+                                            <span class="zh">独立负责海外业务线埋点、看板迭代。</span><span class="en">Independently managed telemetry and dashboard iteration for overseas business.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">开发<b>埋点查询 Agent</b>，解决运营查数难题。</span><span class="en">Developed <b>Telemetry Query Agent</b> to solve data retrieval pain points.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-col right">
+                                <img class="timeline-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/xueqiu.jpg" alt="Xueqiu">
+                            </div>
+                        </div>
+                
+                        <div class="timeline-row">
+                            <div class="timeline-col left">
+                                <img class="timeline-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/baidu.jpg" alt="Baidu">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-col right">
+                                <div class="timeline-content">
+                                    <span class="timeline-date">2025.03 - 2025.07</span>
+                                    <h3>
+                                        <span class="zh">百度 · AI 产品实习</span><span class="en">Baidu · AI PM Intern</span>
+                                    </h3>
+                                    <ul class="timeline-details">
+                                        <li>
+                                            <span class="zh">设计搜索 Push的AIGC承接方案，日均产出 2w+ 内容。</span><span class="en">Designed AIGC strategy for Search Push, generating 20k+ daily content.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">参与设计 LLM Query 生成策略和prompt，实现个性化内容分发。</span><span class="en">Participated in designing LLM Query generation strategy and prompts for personalized content distribution.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">参与AI搜索APP调研，专业多篇产品体验报告。</span><span class="en">Conducted research on AI search apps and produced multiple professional product experience reports.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                
+                        <div class="timeline-row">
+                            <div class="timeline-col left">
+                                <div class="timeline-content">
+                                    <span class="timeline-date">2025.09 - 2027.07</span>
+                                    <h3>
+                                        <span class="zh">浙江大学</span><span class="en">Zhejiang University</span>
+                                    </h3>
+                                    <p class="subtitle">
+                                        <span class="zh">金融科技 (FinTech) 硕士</span><span class="en">Master of FinTech</span>
+                                    </p>
+                                    <ul class="timeline-details">
+                                        <li>
+                                            <span class="zh">设计基于TCN的量化交易策略，年化收益44%，夏普比率超过2.4。</span><span class="en">Designed a TCN-based quantitative trading strategy with a Sharpe ratio over 4.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">聚焦AI ×金融交叉，探索 LLM 在业务中的落地路径。</span><span class="en">Focus on AI × Finance, exploring real-world LLM applications.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-col right">
+                                <img class="timeline-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/zju.jpg" alt="ZJU">
+                            </div>
+                        </div>
+                
+                        <div class="timeline-row">
+                            <div class="timeline-col left">
+                                <img class="timeline-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/meituan.jpg" alt="Meituan">
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-col right">
+                                <div class="timeline-content">
+                                    <span class="timeline-date">2025.10 - 2026.03</span>
+                                    <h3>
+                                        <span class="zh">美团 · 推荐策略产品实习</span><span class="en">Meituan · RecSys PM Intern</span>
+                                    </h3>
+                                    <ul class="timeline-details">
+                                        <li>
+                                            <span class="zh">主导信息流“新鲜感”项目，发现量 +7.4w。</span><span class="en">Led feed "freshness" strategy, increasing discovery volume by +74k.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">推动搜推联动策略，节日期间带动阅读时长+10%。</span><span class="en">Promoted Search-Rec integration strategy, boosting reading time by +10% during holidays.</span>
+                                        </li>
+                                        <li>
+                                            <span class="zh">参与AI攻略合集生成，优化信息流内容供给。</span><span class="en">Participated in generating AI guide collections to optimize feed content supply.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="scroll-guide-overlay" id="scroll-guide">
+                    <div class="scroll-indicator-text">
+                        <span class="zh">向下滚动探索更多经历 ↓</span>
+                        <span class="en">Scroll to explore more ↓</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="project">
+            <h2 class="section-title">
+                <span class="zh">The Creator 创造者</span><span class="en">The Creator</span>
+            </h2>
+            
+            <div class="project-showcase">
+                <div class="browser-mockup">
+                    <div class="browser-header">
+                        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                        <div class="browser-url">uxbot.com/workspace/fitness-app</div>
+                    </div>
+                    <div class="browser-content">
+                        <img src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/app.jpg" alt="UXBot Workspace" class="project-preview-img">
+                    </div>
+                </div>
+
+                <div class="project-details">
+                    <div class="project-header">
+                        <img src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/微信图片_20260323235945_416_85.jpg" alt="App Icon" class="project-app-icon">
+                        <div>
+                            <h3 class="project-title">
+                                <span class="zh">健身打卡 App</span><span class="en">Fitness Tracker (Demo)</span>
+                            </h3>
+                            <p class="project-role">
+                                <span class="zh">Vibe Coding 独立开发</span><span class="en">Independent Vibe Coding</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <p class="project-desc">
+                        <span class="zh">通过纯自然语言对话（Prompt Engineering）完成的移动端应用原型。从 0 到 1 实现了核心的打卡逻辑与 UI 渲染，展现了 AI 赋能下的极速产品交付能力。</span>
+                        <span class="en">A mobile app prototype built entirely through natural language (Prompt Engineering). Demonstrated rapid product delivery empowered by AI, from zero to one core tracking logic and UI rendering.</span>
+                        <br><br>
+                        <strong><span class="zh">主要功能：</span><span class="en">Key Features: </span></strong>
+                        <span class="zh">创建计划、锻炼记录、查看数据、社交挑战</span>
+                        <span class="en">Create plans, log workouts, view data, social challenges</span>
+                    </p>
+
+                    <div class="project-tags">
+                        <span class="p-tag">Vibe Coding</span>
+                        <span class="p-tag">Prompt Engineering</span>
+                        <span class="p-tag">UXBot</span>
+                        <span class="p-tag">Rapid Prototyping</span>
+                    </div>
+
+                    <a href="https://dev.uxbot.cn/share/4505609121F44072AA8059796BB36F77?referral_code=A66D1B46F0394D1B90DD88AF28C23599" target="_blank" class="project-link-btn">
+                        <span class="zh">查看工作流与预览 🚀</span><span class="en">View Workflow & Preview 🚀</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="social">
+            <h2 class="section-title">
+                <span class="zh">The Connector 链接者</span><span class="en">The Connector</span>
+            </h2>
+            <div class="social-container">                    
+                <div class="social-left">
+                    <div class="account-preview">
+                        <img class="account-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/85.jpg" alt="Profile">
+                        
+                        <div class="account-info" style="text-align: left;">
+                            <p style="line-height: 1.6; font-size: 0.95em; color: var(--text-color); margin-bottom: 20px;">
+                                <span class="zh">自媒体是我深度探索 Z 世代需求的<b>观测站</b>。通过持续创作，我完成了从<b>痛点挖掘、内容定义到流量增长</b>的全链路实验。不仅产出了多篇千赞爆款，更通过数据反馈沉淀了对产品逻辑的独到理解。</span>
+                                <span class="en">Social media is my <b>observation station</b> for Gen-Z needs. I completed the full-link experiment from <b>pain point discovery to traffic growth</b>, gaining deep insights into product operations.</span>
+                            </p>
+
+                            <div class="insight-tag">
+                                <span class="zh">💡 洞察：非技术用户的“畏难感”是核心门槛</span>
+                                <span class="en">💡 Insight: Non-tech users' "fear" is the main barrier</span>
+                            </div>
+                            <div class="insight-tag">
+                                <span class="zh">📈 增长：1.2w+ 赞源于「共情引入+干货」</span>
+                                <span class="en">📈 Growth: 12k+ likes driven by empathy + value</span>
+                            </div>
+
+                            <div class="social-tags">
+                                <span class="s-tag">#<span class="zh">哄自己学习法</span><span class="en">StudyMethod</span></span>
+                                <span class="s-tag">#<span class="zh">文科生学AI</span><span class="en">AILearning</span></span>
+                                <span class="s-tag">#<span class="zh">女生成长</span><span class="en">GirlsGrowth</span></span>
+                            </div>
+                            <div class="click-guide-btn">
+                                <span class="zh">👉 滑动右侧屏幕查阅更多内容</span>
+                                <span class="en">👉 Scroll right screen for more</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="social-right-phone">
+                    <div class="phone-mockup">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <div class="xhs-feed-container">
+                                <a href="http://xhslink.com/o/55oomPHJgLW" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/vibecoding.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">一些文科生学vibe coding心得/tips</span><span class="en">Tips for arts students learning vibe coding</span></p>
+                                        <div class="xhs-footer"><span>❤️ 1k</span></div>
+                                    </div>
+                                </a>
+                                <a href="http://xhslink.com/o/5XNwKhkE1sh" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/manji.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">集美你怎么把自己哄成满绩了”</span><span class="en">"Sister, how did you coax yourself into a perfect GPA?"</span></p>
+                                        <div class="xhs-footer"><span>❤️ 11k</span></div>
+                                    </div>
+                                </a>
+                                <a href="http://xhslink.com/o/CS6FhCKJJ3" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/baoyan.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">宝宝 没有人能决定你的上限</span><span class="en">Baby, no one can define your limits</span></p>
+                                        <div class="xhs-footer"><span>❤️ 5k</span></div>
+                                    </div>
+                                </a>
+                                <a href="http://xhslink.com/o/AJqQ5RwY8Oy" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/vlog.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">小组作业如何把美国同学逼的说中文</span><span class="en">How group work forced my American classmates to speak Chinese</span></p>
+                                        <div class="xhs-footer"><span>❤️ 4k</span></div>
+                                    </div>
+                                </a>
+                                <a href="http://xhslink.com/o/7ptQvCyEfm2" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/418_85.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">妈妈问我是怎么做到一个7个pre还飞小韩看con的</span><span class="en">How could I manage to watch concert in Korea during a busy week</span></p>
+                                        <div class="xhs-footer"><span>❤️ 1k</span></div>
+                                    </div>
+                                </a>
+                                <a href="https://xhslink.com/m/6CQKnyfdOYn" target="_blank" class="xhs-item">
+                                    <img class="xhs-img-placeholder" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/3.jpg" alt="Cover">
+                                    <div class="xhs-text-cont">
+                                        <p class="xhs-title"><span class="zh">跳转主页查看更多笔记</span><span class="en">More posts available</span></p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="talents">
+            <div class="talent-header">
+                <h2 class="section-title">
+                    <span class="zh">The Explorer 探索者</span><span class="en">The Explorer</span>
+                </h2>
+                <div class="floating-keyword">
+                    <span class="zh">👆 点击卡牌，翻阅我作为PM的底色 👆</span>
+                    <span class="en">👆 Click cards to explore my PM DNA 👆</span>
+                </div>
+            </div>
+        
+            <div class="tarot-stage" id="tarot-stage">
+                <div class="tarot-container">
+                    <div class="tarot-card" onclick="flipTarot(this, 1)" style="--i:1">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/hjs.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 2)" style="--i:2">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/xxl.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 3)" style="--i:3">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/skz.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 4)" style="--i:4">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/4.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 5)" style="--i:5">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/5.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 6)" style="--i:6">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/6.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                    <div class="tarot-card" onclick="flipTarot(this, 7)" style="--i:7">
+                        <div class="card-inner">
+                            <div class="card-back"></div><div class="card-front"><img class="card-image" src="https://raw.githubusercontent.com/xuenqi/website_image/main/img/7.jpg" alt="Story"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-panel" id="story-panel">
+                    <div id="story-content-inject"></div>
+                    <button class="close-btn" onclick="closeTarot()">
+                        <span class="zh">← 返回牌组</span><span class="en">← Back to Deck</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align:center; padding: 40px 0; color: #888; font-weight: bold;">
+            Made with ❤️ and Vibe by Qiuqiu
+        </footer>
+    </div>
+
+    <script>
+        // 1. 语言切换逻辑
+        const langToggle = document.getElementById('langToggle');
+        const phrases_zh = ["产品经理", "数据探索者", "ENFJ"];
+        const phrases_en = ["Product Manager", "Data Explorer", "ENFJ"];
+        let currentPhrases = phrases_zh;
+
+        if (langToggle) {
+            langToggle.addEventListener('click', () => {
+                document.body.classList.toggle('en-mode');
+                if (document.body.classList.contains('en-mode')) {
+                    langToggle.textContent = '中文'; 
+                    currentPhrases = phrases_en;
+                } else {
+                    langToggle.textContent = 'English';
+                    currentPhrases = phrases_zh;
+                }
+                phraseIndex = 0; charIndex = 0; isDeleting = false; 
+                if (textElement) textElement.textContent = ""; 
+            });
+        }
+
+        // 2. 打字机逻辑
+        const textElement = document.getElementById('typewriter');
+        let phraseIndex = 0, charIndex = 0, isDeleting = false, typeSpeed = 150;
+        function type() {
+            if (!textElement) return;
+            const currentPhrase = currentPhrases[phraseIndex];
+            if (!currentPhrase) { phraseIndex = 0; setTimeout(type, 50); return; }
+            
+            if (isDeleting) { textElement.textContent = currentPhrase.substring(0, charIndex - 1); charIndex--; typeSpeed = 50; } 
+            else { textElement.textContent = currentPhrase.substring(0, charIndex + 1); charIndex++; typeSpeed = 150; }
+
+            if (!isDeleting && charIndex === currentPhrase.length) { isDeleting = true; typeSpeed = 2000; } 
+            else if (isDeleting && charIndex === 0) { isDeleting = false; phraseIndex = (phraseIndex + 1) % currentPhrases.length; typeSpeed = 500; }
+            setTimeout(type, typeSpeed);
+        }
+        type();
+
+        // 3. 实习模块滚动渐变遮罩逻辑
+        const scrollBox = document.getElementById('intern-scroll');
+        const scrollGuide = document.getElementById('scroll-guide');
+        if(scrollBox && scrollGuide) {
+            scrollBox.addEventListener('scroll', () => {
+                if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 20) {
+                    scrollGuide.style.opacity = '0';
+                } else {
+                    scrollGuide.style.opacity = '1';
+                }
+            });
+        }
+
+        // 4. 塔罗牌 3D 故事逻辑
+        const storiesData = {
+            1: {
+                titleZh: "为爱产粮的灵魂画手", titleEn: "Soulful Artist",
+                tagZh: "🎨 审美感知", tagEn: "🎨 Aesthetic Perception",
+                descZh: "能够通过绘画将抽象的感受具象化，展现独特的审美和构图能力，赋予了我对产品视觉调性和用户心理预期的天然感知力。",
+                descEn: "Materializing abstract feelings through painting demonstrates my unique aesthetic and compositional skills. This grants me a natural intuition for product visual tone and user expectations."
+            },
+            2: {
+                titleZh: "消消乐7000关玩家", titleEn: "7000-Level Puzzle Player",
+                tagZh: "🧭 长期坚持", tagEn: "🧭 Persistence",
+                descZh: "擅于在低即时反馈的情况下坚持行动，稳住内心，依靠长期主义取得最后的结果。",
+                descEn: "Adept at persevering in low-instant-feedback environments, maintaining inner stability, and relying on long-termism to achieve the ultimate goals."
+            },
+            3: {
+                titleZh: "24h极限韩国往返", titleEn: "24h Korea Speedrun",
+                tagZh: "⚡ 时间管理能力", tagEn: "⚡ Time Management",
+                descZh: "在同周有7个Pre的情况下，提前确定优先级并制定详细规划，精准卡上每一个时间节点，完成跨国看演唱会的挑战。",
+                descEn: "Juggling 7 presentations in one week, I prioritized tasks, executed detailed plans, and hit every timeline precisely to complete the challenge of a cross-border concert trip."
+            },
+            4: {
+                titleZh: "学院晚会总导演", titleEn: "Gala Chief Director",
+                tagZh: "🤹 多线程管理", tagEn: "🤹 Multi-thread Management",
+                descZh: "统筹100+演职人员的会前-会中-会后调度，针对灯光、音响、节目进度，在对讲机里做出每一个实时决策，晚会成为后续范本。",
+                descEn: "Coordinated end-to-end logistics for 100+ cast and crew. Made real-time decisions on lighting, audio, and program flow via walkie-talkie, setting a standard for future galas."
+            },
+            5: {
+                titleZh: "挑战杯省赛银奖", titleEn: "Silver in Challenge Cup",
+                tagZh: "🧠 信息内化与表达", tagEn: "🧠 Info Internalization",
+                descZh: "作为项目产品负责人以及答辩人，通过逻辑拆解法在24小时内完成对1500字答辩稿的内化，最终带领首次参赛的团队斩获省赛银奖。",
+                descEn: "As the product lead and presenter, I internalized a 1500-word pitch in 24 hours using logical breakdown, ultimately leading our first-time team to a silver medal in the provincial competition."
+            },
+            6: {
+                titleZh: "10w赞内容创作者", titleEn: "100k+ Likes Viral Creator",
+                tagZh: "🎯 用户痛点洞察", tagEn: "🎯 Sharp User Insight",
+                descZh: "从用户兴趣、热点内容出发，精准捕捉到文科生学AI的畏难情绪，创作多篇爆文。从真实的用户视角定义内容与产品，拒绝自嗨式设计。",
+                descEn: "Starting from user interests, I accurately captured arts students' fear of AI to create multiple viral posts. I define products from a genuine user perspective, rejecting self-indulgent design."
+            },
+            7: {
+                titleZh: "毕业典礼舞蹈表演", titleEn: "Graduation Dance",
+                tagZh: "💎 细节把控", tagEn: "💎 Detail Craftsmanship",
+                descZh: "从零基础到站在全校毕业生的注视下完成高难度的编舞展现。C位背后的 100 次练习，是我对细节推敲到完美的偏执。",
+                descEn: "Went from zero foundation to performing complex choreography for all graduates. The 100+ practices behind the center position reflect my obsession with details."
+            }
+        };
+
+        const stage = document.getElementById('tarot-stage');
+        const injectArea = document.getElementById('story-content-inject');
+
+        function flipTarot(cardElement, index) {
+            const currentActive = document.querySelector('.tarot-card.flipped');
+            if (currentActive && currentActive !== cardElement) {
+                currentActive.classList.remove('flipped');
+            }
+            
+            cardElement.classList.add('flipped');
+            stage.classList.add('has-active');
+
+            const data = storiesData[index];
+            injectArea.innerHTML = `
+                <h3 class="story-title">
+                    <span class="zh">${data.titleZh}</span><span class="en">${data.titleEn || data.titleZh}</span>
+                </h3>
+                <div class="story-tag">
+                    <span class="zh">${data.tagZh}</span><span class="en">${data.tagEn || data.tagZh}</span>
+                </div>
+                <p class="story-desc">
+                    <span class="zh">${data.descZh}</span><span class="en">${data.descEn || data.descZh}</span>
+                </p>
+            `;
+        }
+
+        function closeTarot() {
+            const currentActive = document.querySelector('.tarot-card.flipped');
+            if (currentActive) {
+                currentActive.classList.remove('flipped');
+            }
+            stage.classList.remove('has-active');
+        }
+    </script>
+</body>
+</html>
